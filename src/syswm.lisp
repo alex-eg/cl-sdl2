@@ -1,6 +1,5 @@
 (in-package :sdl2)
 
-#++
 (defun get-window-wm-info (window)
   (c-with ((info sdl2-ffi::sdl-syswm-info))
     (setf (info :version :major) sdl2-ffi:+sdl-major-version+
@@ -15,7 +14,16 @@
          (:x11
           (list :display (info :info :x11 :display)
                 :window (info :info :x11 :window)))
+         #+(not (or windows darwin))
+         (:wayland
+          (list :display (info :info :wl :display)
+                :surface (info :info :wl :surface)
+                :shell-surface (info :info :wl :shell-surface)))
          #+windows
          (:windows
           (list :window (info :info :win :window)
-                :hdc (info :info :win :hdc))))))))
+                :hdc (info :info :win :hdc)
+                :hinstance (info :info :win :hinstance)))
+         #+darwin
+         (:cocoa
+          (list :window (info :info :cocoa :window))))))))
